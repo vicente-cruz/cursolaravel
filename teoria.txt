@@ -37,3 +37,14 @@ Aula 3:
 
     PagesController@about
 Aula 4:
+    resources -> views -> cria 'layouts/app.blade.php' e copia todo o HTML para ele. No body coloca @yield('content')
+    Modifica pages/<index|about|services>.blade.php colocando @extends('layouts.app') e @section
+
+    Altera app/Http/Controllers/PagesController.php
+        Passa parâmetros (1 ou + variáveis) do controller para a view
+    Carrega o public/css/app.css no resources/views/layouts/app.blade.php
+        link rel="stylesheet" href="{{asset('css/app.css')}}"
+
+    Instalar configurações do "scss" com Node.js
+    Via CMD, dentro do diretorio do projeto.
+    > npm install
