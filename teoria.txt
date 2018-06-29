@@ -1,0 +1,39 @@
+OBS: Preferencialmente usar o SUBLIME TEXT 3 devido ao template BLADE
+a) Instalar Sublime Text 3
+b) Instalar o gerenciador de pacotes.
+    1) Ir em https://packagecontrol.io -> Installation -> Aba "Sublime Text 3";
+    2) Copiar todo o textão gigante;
+    3) Abrir o Sublime, apertar CTRL + ` (ou ir em View -> Show Console), e colar o texto.
+    4) Reiniciar o Sublime.
+c) Instalar os pacotes "Laravel Blade Highlighter" e "Blade Snippets"
+    1) Abrir o Sublime.
+    2) Abrir o gerenciador de pacotes: CTRL + Shift + p OU Tools -> Command Palette...
+    3) Digitar o nome do pacote desejado. Apertar ENTER
+    4) Reiniciar o Sublime
+Fonte: https://www.youtube.com/watch?v=FeuZtBdS20c
+
+
+Aula 1: Explicação sobre o que é o Laravel, como funciona, etc.
+Aula 2:
+    1) Baixando o Xampp, Composer, etc...: 
+    2) Baixando o Laravel com Composer.
+    3) Configurando um Host e VirtualHost para o projeto do Laravel
+    4) Explicando as pastas App, public, resources, providers, routes, config...
+Aula 3:
+    Routes -> Cria Hello
+    Resources -> views -> pages -> cria 'pages/about.blade.php', modifica "Routes"
+    Routes -> /users/{id}
+    
+    Cria PagesController
+        $ php artisan make:controller PagesController
+    Cria action PagesController::index() c/ return view('pages.index');
+    Routes -> modifica '/' para "PagesController@index"
+    Cria pages/index.blade.php
+
+    Modifica .env
+        APP_NAME=ProjetoLaravel
+    pages/index.blade.php -> {{config('app.name','ProjetoLaravel')}}, <h1><p>...
+    pages/about.blade.php -> Idem...
+
+    PagesController@about
+Aula 4:
