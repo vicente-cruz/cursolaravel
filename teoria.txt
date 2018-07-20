@@ -12,13 +12,29 @@ c) Instalar os pacotes "Laravel Blade Highlighter" e "Blade Snippets"
     4) Reiniciar o Sublime
 Fonte: https://www.youtube.com/watch?v=FeuZtBdS20c
 
+OBS2: Quando há vários projetos Laravel dentro de um diretório.
+Ex: C:/xampp/htdocs/cursolaravel/
+        ProjetoLaravel1/
+        ...
+        ProjetoLaravelN/
+Colocar o .htaccess dentro da pasta raiz do projeto:
+    C:/xampp/htdocs/cursolaravel/ProjetoLaravel1/.htdocs
+Com o conteúdo:
+    <IfModule mod_rewrite.c>
+        RewriteEngine On
+        RewriteBase /ProjetoLaravel/
+        RewriteRule ^(.*)$ public/$1 [L]
+    </IfModule>
+Fonte: https://www.opentechguides.com/how-to/article/php/116/laravel-remove-public.html
 
 Aula 1: Explicação sobre o que é o Laravel, como funciona, etc.
+
 Aula 2:
     1) Baixando o Xampp, Composer, etc...: 
     2) Baixando o Laravel com Composer.
     3) Configurando um Host e VirtualHost para o projeto do Laravel
     4) Explicando as pastas App, public, resources, providers, routes, config...
+
 Aula 3:
     Routes -> Cria Hello
     Resources -> views -> pages -> cria 'pages/about.blade.php', modifica "Routes"
@@ -45,6 +61,184 @@ Aula 4:
     Carrega o public/css/app.css no resources/views/layouts/app.blade.php
         link rel="stylesheet" href="{{asset('css/app.css')}}"
 
-    Instalar configurações do "scss" com Node.js
-    Via CMD, dentro do diretorio do projeto.
+    Instalar configurações do "scss" com Node.js via CMD, dentro do diretorio do projeto.
+    Obs: se estiver atrás de proxy, configurar o NPM para usá-lo:
+        > npm config set proxy http://<ip>:<porta>
+        > npm config set https-proxy https://<ip>:<porta>
     > npm install
+    Notar que será criada a pasta chamada "node_modules"
+
+    Testar se foi corretamente instalado.
+        1) Ir em resources -> assets -> sass -> _variables.scss
+            // $body-bg: #f5f8fa;
+            $body-bg: red;
+        2) "compilar" as alterações
+            > npm run development
+        3) Ver se a tela está "vermelho"
+    Deixar habilitado para compilar toda vez que alterar algum parametro do sass
+        1) > npm run watch
+        2) Remodificar o arquivo _variables.scss para deixar $body-bg branco novamente
+        3) Notar que o recompilamento acontece automaticamente ao salvar.
+
+    Criando configurações personalizadas:
+        1) Em resources -> assets -> sass, criar o arquivo _custom.scss
+        2) Dentro de sass, abrir o arquivo app.scss e adicionar custom após a carga do bootstrap;
+
+    Criando um NAVBAR
+        Em resources -> views -> layouts -> app.blade.php, colocar o @yield('content') dentro de um container
+        Criar a pasta resources -> views -> inc e criar navbar.blade.php
+        Inserir @include('inc.navbar') após o <body>
+
+    Alterando index.blade.php, colocando um jumbotron
+
+Aula 5:
+    Criar DB. Ex: ProjetoLaravel
+
+    Criar o controller PostsController com o artisan:
+        $ php artisan make:controller PostsController
+
+    Criar o model Post (no singular):
+        $ php artisan make:model Post -m
+
+    Notar que foi criado o arquivo YYYY_MM_DD_NNNNNN_create_<nome_tabela>_table.php  em database/migrations/ . Ex: 2018_07_19_200954_create_posts_table.php
+
+    Já existem os arquivos:
+        2014_10_12_000000_create_users_table.php
+        2014_10_12_100000_create_password_resets_table.php
+
+    Abrir 2018_07_19_200954_create_posts_table.php e inserir os campos title e body na função Up.
+    class CreatePostsTable extends Migration
+    {
+    ...
+        public function up()
+        {
+        ...
+            $table->string('title');
+            $table->mediumText('body');
+
+    Editar o arquivo '.env' e preencher os valores em DB_DATABASE, DB_USERNAME, DB_PASSWORD.
+        DB_DATABASE=projetolaravel
+        DB_USERNAME=root
+        DB_PASSWORD=
+
+    Inserir, no arquivo app/Providers/AppServiceProvider.php:
+    No início, o texto: use Illuminate\Support\Facades\Schema;
+    Na função boot: Schema::defaultStringLength(191);
+
+    Executar o migrate.
+    $ php artisan migrate
+    ...
+    Migration table created successfully.
+    Migrating: 2014_10_12_000000_create_users_table
+    ...
+
+    Usar o tinker para interagir com o DB e fazer alguns testes.
+    $ php artisan tinker
+    >>> App\Post::count()
+    >>> $post = new App\Post();
+    >>> $post->title = 'Post Teste 1';
+    >>> $post->body = 'Post Teste 1, corpo';
+    >>> $post->save();
+
+    Recriar o controller PostsController, mas com as funções CRUD
+    $ php artisan make:controller PostsController --resource
+
+    routes -> web.php: inclui Route::resource('posts','PostsController');
+    Obs: o projeto atual está dentro em cursolaravel.pc/ProjetoLaravel:
+        Route::resource('/ProjetoLaravel/posts', 'PostsController');
+    Automaticamente cria as rotas com parametros para efetuar CRUD dos Posts.
+
+    Visualizar todas as rotas disponíveis:
+    $ php artisan route:list
+
+Aula 6:
+    Em app/Post.php:
+        protected $table = '$posts';
+        public $primaryKey = 'id';
+        public $timestamps = true;
+    Em resources/views -> cria posts/index.blade.php
+        @extends('layouts.app')
+        @section('content')
+            <h1>Posts</h1>
+        @endsection
+
+    Em app/Http/Controllers/PostsController.php:
+        ...
+        Use App\Post;
+        ...
+        public function index() {
+            ...
+            // usando o ELOQUENT para acessar o DB
+            $post = Post::all();
+            return view('posts.index')->with('posts',$posts);
+
+    Em resources/views/posts.blade.php
+        Inclui parte que visualiza os posts
+
+    Em resources/views/inc/navbar.blade.php
+        Altera menu do navbar e inclui link para o Blog
+        ... <li><a href="/ProjetoLaravel/posts">Blog</a></li>
+
+    Em app/Http/Controllers/PostsController.blade.php:
+        ... public function show($id) {
+            $post = Post::find($id);
+            return view('posts.show')->with('post',$post);
+
+    Cria resources/views/posts/show.blade.php
+
+Aula 7:
+    Acessar www.laravelcollective.com para construir um Form HTML
+    Instalar o LaravelCollective com o composer
+    $ composer require "laravelcollective/html":"^5.4.0"
+
+    Em app/config/app.php, inserir:
+        No campo 'providers':
+            ... Collective\Html\HtmlServiceProvider::class,
+        Em 'aliases':
+            ...
+          'Form' => Collective\Html\FormFacade::class,
+          'Html' => Collective\Html\HtmlFacade::class,
+
+    Construir o formulário em resources/views/posts/create.blade.php
+
+    Em PostsController::store()
+        ...
+        $this->validate($request, [
+             'title' => 'required'
+            ,'body' => 'required'
+        ]);
+
+    Cria resources/views/posts/create.blade.php
+        ... {!! Form::open([ 'action' => 'PostsController@store', 'method' => 'POST']) !!}
+        <div class="form-group">
+            {{Form::label('title', 'Título')}}
+            {{Form::text('title', '', ['class' => 'form-control', 'placeholder' => 'Título'])}}
+        </div>
+
+    Cria resources/views/inc/messages.blade.php
+        @if (session('success'))
+            <div class="alert alert-success">
+                {{session('success')}}
+            </div>
+        @endif
+
+    Cria link para criar Posts em resources/views/inc/navbar.blade.php
+
+    Instalar o pacote laravel-ckeditor
+        $ composer require unisharp/laravel-ckeditor
+
+    Carregar o pacote em app/config/app.php
+        'providers' => [
+            ...
+            Unisharp\Ckeditor\ServiceProvider::class,
+
+    Fazer o artisan vendor:publish:
+        $ php artisan vendor:publish --tag=ckeditor
+
+    Carregar os scripts em resources/views/layouts/app.blade.php
+    ...
+        <script src="/ProjetoLaravel/vendor/unisharp/laravel-ckeditor/ckeditor.js"></script>
+        <script>CKEDITOR.replace('article-ckeditor');</script>
+    </body>
+
+    Inserir o 'article-ckeditor' no textarea em 'resources/views/posts/create.blade.php'
